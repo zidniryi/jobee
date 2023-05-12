@@ -6,6 +6,11 @@ from django.contrib.gis.db import models as gismodels
 from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User 
 
+import geocoder
+import os
+
+
+
 
 class JobType(models.TextChoices):
     Permanent = "Permanent"
@@ -30,7 +35,7 @@ class Experience(models.TextChoices):
     
 
 def return_date_time():
-    now = datetime.now()
+    now =datetime.datetime.now()
     return now + datetime.timedelta(days=10)
 
 
@@ -39,20 +44,26 @@ class Job(models.Model):
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
     email = models.EmailField(null=True)
-    address = models.CharField(max_length=100, null=True)
-    jobType = models.CharField(max_length=10, choices=JobType.choices, default=JobType.Permanent)
-    education = models.CharField(max_length=10, choices=Education.choices, default=Education.Bachelors)
-    industry = models.CharField(max_length=10, choices=Industry.choices, default=Industry.Business)
-    experience = models.CharField(max_length=10, choices=Experience.choices, default=Experience.NO_EXPERIENCE)
-    salary = models.IntegerField(default=1, validators=[(MinValueValidator(1), MaxValueValidator(10000000))])
+    address = models.CharField(max_length=2000, null=True)
+    jobType = models.CharField(max_length=200, choices=JobType.choices, default=JobType.Permanent)
+    education = models.CharField(max_length=200, choices=Education.choices, default=Education.Bachelors)
+    industry = models.CharField(max_length=200, choices=Industry.choices, default=Industry.Business)
+    experience = models.CharField(max_length=200, choices=Experience.choices, default=Experience.NO_EXPERIENCE)
+    salary = models.IntegerField(default=1)
     position = models.IntegerField(default=-1)
-    company = models.CharField(max_length=100, null=True)
+    company = models.CharField(max_length=2000, null=True)
     point = gismodels.PointField(default=Point(0.0, 0.0))
     lastDate = models.DateTimeField(default=return_date_time)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     create_at = models.DateTimeField(auto_now=True)
     
+def save(self, *args, **kwargs):
+    g = geocoder.mapquest(self.adress, key=os.getenv('GEOCODER_API'))
     
+    lng = g.lng
+    lat = g.lat
     
+    self.point = Point(lng, lat)
+    super(Job, self).save(*args, **kwargs)
     
     
