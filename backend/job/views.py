@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404
 from .models import Job
 from .serializers import JobSerializer
 
+from django.db.models import Avg, Min, Max, Count
+
 
 # Create your views here.
 @api_view(['GET'])
@@ -63,5 +65,24 @@ def deleteJob(request, pk):
     job.delete()
 
     return Response({ 'message': 'Job is Deleted.' }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def getTopicStats(request, topic):
+    
+    args = {'title__icontains': topic }
+    jobs = Job.objects.filter(**args)
+    
+    if len(jobs) == 0:
+        return Response({"message": "No Stats Found With {topic}".format(topic=topic)})
+    
+    stats = jobs.aggregate(
+        total_jobs = Count('title'),
+        avg_positions = Avg('position'),
+        avg_salary = Avg('salary'),
+        min_salary = Min('salary'),
+        max_salary = Max('salary')
+    )
+    
+    return Response(stats)
 
 
