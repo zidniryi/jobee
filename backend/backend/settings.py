@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     # "storages",
     "django.contrib.gis",
     "rest_framework",
-    # "django_filters",
-    'job.apps.JobConfig'
+    'job.apps.JobConfig',
+    "django_filters",
 ]
 
 MIDDLEWARE = [

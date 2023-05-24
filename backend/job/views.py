@@ -8,15 +8,17 @@ from .models import Job
 from .serializers import JobSerializer
 
 from django.db.models import Avg, Min, Max, Count
+from .filters import JobFilters
 
 
 # Create your views here.
 @api_view(['GET'])
 def getAllJobs(request):
 
-    jobs = Job.objects.all()
+    # jobs = Job.objects.all()
+    filterset = JobFilters(request.GET, queryset=Job.objects.all().order_by('id'))
 
-    serializer = JobSerializer(jobs, many=True)
+    serializer = JobSerializer(filterset.qs, many=True)
     return Response(serializer.data)
     
 @api_view(['GET'])
