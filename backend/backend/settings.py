@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "rest_framework",
     'job.apps.JobConfig',
+    'account.apps.AccountConfig',
     "django_filters",
 ]
 
